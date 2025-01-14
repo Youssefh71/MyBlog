@@ -12,5 +12,4 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByContentContainingIgnoreCase(String keyword);
     List<Article> findByCreatedAtAfter(LocalDateTime createdAt);
     List<Article> findByOrderByCreatedAtDesc(Limit limit);
-
 }
