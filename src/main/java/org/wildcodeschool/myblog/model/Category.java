@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jdk.jfr.Name;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 public class Category {
@@ -20,6 +21,9 @@ public class Category {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "category")
+    private List<Article> articles;
 
     public void setId(Long id) {
         this.id = id;
@@ -53,4 +57,11 @@ public class Category {
         this.createdAt = createdAt;
     }
 
+    public List<Article> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(List<Article> articles) {
+        this.articles = articles;
+    }
 }
