@@ -1,12 +1,12 @@
 package org.wildcodeschool.myblog.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.dto.ImageDTO;
 import org.wildcodeschool.myblog.model.Image;
-import org.wildcodeschool.myblog.repository.ArticleRepository;
 import org.wildcodeschool.myblog.repository.ImageRepository;
 import java.util.List;
 import org.wildcodeschool.myblog.model.Article;
@@ -19,12 +19,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/images")
 public class ImageController {
 
-    private ImageRepository imageRepository;
-    private ArticleRepository articleRepository;
+    private final ImageRepository imageRepository;
 
-
-    public ImageController(ArticleRepository articleRepository) {
-        this.articleRepository = articleRepository;
+    public ImageController(ImageRepository imageRepository) {
+        this.imageRepository = imageRepository;
     }
 
     @GetMapping
@@ -53,7 +51,7 @@ public class ImageController {
     @PostMapping
     public ResponseEntity<ImageDTO> createImage(@RequestBody Image image) {
         Image savedImage = imageRepository.save(image);
-        return ResponseEntity.status(201).body(convertToDTO(savedImage));
+        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedImage));
     }
 
 

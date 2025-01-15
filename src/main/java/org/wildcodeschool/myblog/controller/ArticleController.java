@@ -5,12 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.wildcodeschool.myblog.dto.ArticleDTO;
-import org.wildcodeschool.myblog.model.Article;
-import org.wildcodeschool.myblog.model.Category;
-import org.wildcodeschool.myblog.model.Image;
-import org.wildcodeschool.myblog.repository.ArticleRepository;
-import org.wildcodeschool.myblog.repository.CategoryRepository;
-import org.wildcodeschool.myblog.repository.ImageRepository;
+import org.wildcodeschool.myblog.dto.AuthorDTO;
+import org.wildcodeschool.myblog.model.*;
+import org.wildcodeschool.myblog.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,11 +22,15 @@ public class ArticleController {
     private final ArticleRepository articleRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
+    private final AuthorRepository authorRepository;
+    private final ArticleAuthorRepository articleAuthorRepository;
 
-    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository) {
+    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository, AuthorRepository authorRepository, ArticleAuthorRepository articleAuthorRepository) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
         this.imageRepository = imageRepository;
+        this.authorRepository = authorRepository;
+        this.articleAuthorRepository = articleAuthorRepository;
     }
 
     @GetMapping
@@ -38,7 +39,7 @@ public class ArticleController {
         if (articles.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
-        List<ArticleDTO> articleDTOS = articles.stream().map(this::convertToDTO).collect(Collectors.toList());
+        List<ArticleDTO> articleDTOS = articleRepository.findAll().stream().map(this::convertToDTO).toList();
         return ResponseEntity.ok(articleDTOS);
     }
 
@@ -53,8 +54,11 @@ public class ArticleController {
 
     @PostMapping
     public ResponseEntity<ArticleDTO> createArticle(@RequestBody Article article) {
-        article.setCreatedAt(LocalDateTime.now());
-        article.setUpdatedAt(LocalDateTime.now());
+
+        LocalDateTime now = LocalDateTime.now();
+        article.setCreatedAt(now);
+        article.setUpdatedAt(now);
+
         if (article.getCategory() != null) {
             Category category = categoryRepository.findById(article.getCategory().getId()).orElse(null);
             if (category == null) {
@@ -83,6 +87,21 @@ public class ArticleController {
             article.setImages(validImages);
         }
         Article savedArticle = articleRepository.save(article);
+        if (article.getArticleAuthors() != null) {
+            for (ArticleAuthor articleAuthor : article.getArticleAuthors()) {
+                Author author = articleAuthor.getAuthor();
+                author = authorRepository.findById(author.getId()).orElse(null);
+                if (author == null) {
+                    return ResponseEntity.badRequest().body(null);
+                }
+
+                articleAuthor.setAuthor(author);
+                articleAuthor.setArticle(savedArticle);
+                articleAuthor.setContribution(articleAuthor.getContribution());
+
+                articleAuthorRepository.save(articleAuthor);
+            }
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToDTO(savedArticle));
     }
 
@@ -127,6 +146,31 @@ public class ArticleController {
             // Si aucune image n'est fournie, on nettoie la liste des images associées
             article.getImages().clear();
         }
+        if (articleDetails.getArticleAuthors() != null) {
+            articleAuthorRepository.deleteAll(article.getArticleAuthors());
+
+            List<ArticleAuthor> updatedArticleAuthors = new ArrayList<>();
+
+            for (ArticleAuthor articleAuthorDetails : articleDetails.getArticleAuthors()) {
+                Author author = articleAuthorDetails.getAuthor();
+                author = authorRepository.findById(author.getId()).orElse(null);
+                if (author == null) {
+                    return ResponseEntity.badRequest().build();
+                }
+
+                ArticleAuthor newArticleAuthor = new ArticleAuthor();
+                newArticleAuthor.setAuthor(author);
+                newArticleAuthor.setArticle(article);
+                newArticleAuthor.setContribution(articleAuthorDetails.getContribution());
+
+                updatedArticleAuthors.add(newArticleAuthor);
+            }
+
+            articleAuthorRepository.saveAll(updatedArticleAuthors);
+
+            article.setArticleAuthors(updatedArticleAuthors);
+        }
+
 
         Article updatedArticle = articleRepository.save(article);
         return ResponseEntity.ok(convertToDTO(updatedArticle));
@@ -137,6 +181,9 @@ public class ArticleController {
         Article article = articleRepository.findById(id).orElse(null);
         if (article == null) {
             return ResponseEntity.notFound().build();
+        }
+        if (article.getArticleAuthors() != null) {
+            articleAuthorRepository.deleteAll(article.getArticleAuthors());
         }
         articleRepository.delete(article);
         return ResponseEntity.noContent().build();
@@ -176,7 +223,7 @@ public class ArticleController {
     public ResponseEntity<List<Article>> getFiveLastArticles(){
         List<Article> fiveLastArticles = articleRepository.findByOrderByCreatedAtDesc(Limit.of(5));
         if (fiveLastArticles.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return (ResponseEntity.noContent().build());
 
         }
         return ResponseEntity.ok(fiveLastArticles);
@@ -193,6 +240,18 @@ public class ArticleController {
         }
         if (article.getImages() != null) {
             articleDTO.setImageUrls(article.getImages().stream().map(Image::getUrl).collect(Collectors.toList()));
+        }
+        if (article.getArticleAuthors() != null) {
+            articleDTO.setAuthors(article.getArticleAuthors().stream()
+                    .filter(articleAuthor -> articleAuthor.getAuthor() != null)
+                    .map(articleAuthor -> {
+                        AuthorDTO authorDTO = new AuthorDTO();
+                        authorDTO.setId(articleAuthor.getAuthor().getId());
+                        authorDTO.setFirstname(articleAuthor.getAuthor().getFirstname());
+                        authorDTO.setLastname(articleAuthor.getAuthor().getLastname());
+                        return authorDTO;
+                    })
+                    .collect(Collectors.toList()));
         }
         return articleDTO;
     }

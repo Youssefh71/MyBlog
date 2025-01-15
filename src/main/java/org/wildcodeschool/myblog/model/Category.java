@@ -1,8 +1,6 @@
 package org.wildcodeschool.myblog.model;
 
 import jakarta.persistence.*;
-import jdk.jfr.Name;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
