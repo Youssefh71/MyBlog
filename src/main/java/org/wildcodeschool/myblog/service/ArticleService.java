@@ -2,6 +2,7 @@ package org.wildcodeschool.myblog.service;
 
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
+import org.wildcodeschool.myblog.dto.ArticleCreateDTO;
 import org.wildcodeschool.myblog.dto.ArticleDTO;
 import org.wildcodeschool.myblog.exception.ResourceNotFoundException;
 import org.wildcodeschool.myblog.mapper.ArticleMapper;
@@ -52,7 +53,9 @@ public class ArticleService {
     }
 
 
-    public ArticleDTO createArticle(Article article) {
+    public ArticleDTO createArticle(ArticleCreateDTO articleCreateDTO) {
+
+        Article article = articleMapper.toEntity(articleCreateDTO);
         LocalDateTime now = LocalDateTime.now();
         article.setCreatedAt(now);
         article.setUpdatedAt(now);
