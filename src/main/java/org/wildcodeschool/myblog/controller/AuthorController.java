@@ -3,6 +3,7 @@ package org.wildcodeschool.myblog.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.wildcodeschool.myblog.dto.*;
+import org.wildcodeschool.myblog.exception.ResourceNotFoundException;
 import org.wildcodeschool.myblog.model.*;
 import org.wildcodeschool.myblog.repository.AuthorRepository;
 
@@ -31,7 +32,7 @@ public class AuthorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable Long id) {
-        Author author = authorRepository.findById(id).orElse(null);
+        Author author = authorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'autheur avec l'id " + id + " n'a pas été trouvé"));
         if (author == null) {
             return ResponseEntity.notFound().build();
         }
@@ -46,7 +47,7 @@ public class AuthorController {
 
     @PutMapping("/{id}")
     public ResponseEntity<AuthorDTO> updateAuthor(@PathVariable Long id, @RequestBody Author authorDetails) {
-        Author author = authorRepository.findById(id).orElse(null);
+        Author author = authorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'autheur avec l'id " + id + " n'a pas été trouvé"));
         if (author == null) {
             return ResponseEntity.notFound().build();
         }
@@ -58,7 +59,7 @@ public class AuthorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
-        Author author = authorRepository.findById(id).orElse(null);
+        Author author = authorRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'autheur avec l'id " + id + " n'a pas été trouvé"));
         if (author == null) {
             return ResponseEntity.notFound().build();
         }
