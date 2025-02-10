@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.wildcodeschool.myblog.dto.ArticleDTO;
 import org.wildcodeschool.myblog.dto.AuthorDTO;
+import org.wildcodeschool.myblog.exception.ResourceNotFoundException;
+import org.wildcodeschool.myblog.mapper.ArticleMapper;
 import org.wildcodeschool.myblog.model.*;
 import org.wildcodeschool.myblog.repository.*;
 
@@ -24,28 +26,30 @@ public class ArticleController {
     private final ImageRepository imageRepository;
     private final AuthorRepository authorRepository;
     private final ArticleAuthorRepository articleAuthorRepository;
+    private final ArticleMapper articleMapper;
 
-    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository, AuthorRepository authorRepository, ArticleAuthorRepository articleAuthorRepository) {
+
+    public ArticleController(ArticleRepository articleRepository, CategoryRepository categoryRepository, ImageRepository imageRepository, AuthorRepository authorRepository, ArticleAuthorRepository articleAuthorRepository, ArticleMapper articleMapper) {
         this.articleRepository = articleRepository;
         this.categoryRepository = categoryRepository;
         this.imageRepository = imageRepository;
         this.authorRepository = authorRepository;
         this.articleAuthorRepository = articleAuthorRepository;
+        this.articleMapper = articleMapper;
     }
+
 
     @GetMapping
     public ResponseEntity<List<ArticleDTO>> getAllArticles() {
-        List<Article> articles = articleRepository.findAll();
-        if (articles.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        List<ArticleDTO> articleDTOS = articleRepository.findAll().stream().map(this::convertToDTO).toList();
-        return ResponseEntity.ok(articleDTOS);
+                List<ArticleDTO> articleDTOS = articleRepository.findAll()
+                        .stream()
+                        .map(articleMapper::toDTO).toList();
+        return articleDTOS.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(articleDTOS);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ArticleDTO> getArticleById(@PathVariable Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
         if (article == null) {
             return ResponseEntity.notFound().build();
         }
@@ -60,7 +64,7 @@ public class ArticleController {
         article.setUpdatedAt(now);
 
         if (article.getCategory() != null) {
-            Category category = categoryRepository.findById(article.getCategory().getId()).orElse(null);
+            Category category = categoryRepository.findById(article.getCategory().getId()).orElseThrow(() -> new ResourceNotFoundException("La catégorie avec l'id " + article.getCategory().getId() + " n'a pas été trouvée"));
             if (category == null) {
                 return ResponseEntity.badRequest().build();
             }
@@ -107,7 +111,7 @@ public class ArticleController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ArticleDTO> updateArticle(@PathVariable Long id, @RequestBody Article articleDetails) {
-        Article article = articleRepository.findById(id).orElse(null);
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
         if (article == null) {
             return ResponseEntity.notFound().build();
         }
@@ -116,7 +120,7 @@ public class ArticleController {
         article.setUpdatedAt(LocalDateTime.now());
 
         if (articleDetails.getCategory() != null) {
-            Category category = categoryRepository.findById(articleDetails.getCategory().getId()).orElse(null);
+            Category category = categoryRepository.findById(articleDetails.getCategory().getId()).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
             if (category == null) {
                 return ResponseEntity.badRequest().build();
             }
@@ -128,7 +132,7 @@ public class ArticleController {
             for (Image image : articleDetails.getImages()) {
                 if (image.getId() != null) {
                     // Vérification des images existantes
-                    Image existingImage = imageRepository.findById(image.getId()).orElse(null);
+                    Image existingImage = imageRepository.findById(image.getId()).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
                     if (existingImage != null) {
                         validImages.add(existingImage);
                     } else {
@@ -153,7 +157,7 @@ public class ArticleController {
 
             for (ArticleAuthor articleAuthorDetails : articleDetails.getArticleAuthors()) {
                 Author author = articleAuthorDetails.getAuthor();
-                author = authorRepository.findById(author.getId()).orElse(null);
+                author = authorRepository.findById(author.getId()).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
                 if (author == null) {
                     return ResponseEntity.badRequest().build();
                 }
@@ -178,7 +182,7 @@ public class ArticleController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Article> deleteArticle(@PathVariable Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
+        Article article = articleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'article avec l'id " + id + " n'a pas été trouvé"));
         if (article == null) {
             return ResponseEntity.notFound().build();
         }

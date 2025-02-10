@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.wildcodeschool.myblog.dto.ImageDTO;
+import org.wildcodeschool.myblog.exception.ResourceNotFoundException;
 import org.wildcodeschool.myblog.model.Image;
 import org.wildcodeschool.myblog.repository.ImageRepository;
 import java.util.List;
@@ -40,7 +41,7 @@ public class ImageController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ImageDTO> getImageById(@PathVariable Long id) {
-        Image image = imageRepository.findById(id).orElse(null);
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
         if (image == null) {
             return ResponseEntity.notFound().build();
         }
@@ -57,7 +58,7 @@ public class ImageController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ImageDTO> updateImage(@PathVariable Long id, @RequestBody Image imageDetails) {
-        Image image = imageRepository.findById(id).orElse(null);
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
         if (image == null) {
             return ResponseEntity.notFound().build();
         }
@@ -69,7 +70,7 @@ public class ImageController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
-        Image image = imageRepository.findById(id).orElse(null);
+        Image image = imageRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("L'image avec l'id " + id + " n'a pas été trouvé"));
         if (image == null) {
             return ResponseEntity.notFound().build();
         }
