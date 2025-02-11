@@ -7,6 +7,7 @@ import org.wildcodeschool.myblog.dto.*;
 import org.wildcodeschool.myblog.exception.ResourceNotFoundException;
 import org.wildcodeschool.myblog.model.*;
 import org.wildcodeschool.myblog.repository.AuthorRepository;
+import org.wildcodeschool.myblog.service.AuthenticationService;
 import org.wildcodeschool.myblog.service.UserService;
 
 import java.util.List;
@@ -19,10 +20,12 @@ public class AuthorController {
 
     private final UserService userService;
     private final AuthorRepository authorRepository;
+    private final AuthenticationService authenticationService;
 
-    public AuthorController(AuthorRepository authorRepository, UserService userService) {
+    public AuthorController(AuthorRepository authorRepository, UserService userService, AuthenticationService authenticationService) {
         this.authorRepository = authorRepository;
         this.userService = userService;
+        this.authenticationService = authenticationService;
     }
 
     @GetMapping
@@ -45,7 +48,6 @@ public class AuthorController {
     }
 
     @PostMapping("/register")
-
     public ResponseEntity<User> register(@RequestBody UserRegistrationDTO userRegistrationDTO) {
         User registeredUser = userService.registerUser(
                 userRegistrationDTO.getEmail(),
@@ -53,6 +55,15 @@ public class AuthorController {
                 Set.of("ROLE_USER")// Par défaut, chaque utilisateur aura le rôle "USER"
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> authenticate(@RequestBody UserLoginDTO userLoginDTO) {
+        String token = authenticationService.authenticate(
+                userLoginDTO.getEmail(),
+                userLoginDTO.getPassword()
+        );
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping
