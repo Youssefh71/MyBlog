@@ -1,23 +1,28 @@
 package org.wildcodeschool.myblog.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.wildcodeschool.myblog.dto.*;
 import org.wildcodeschool.myblog.exception.ResourceNotFoundException;
 import org.wildcodeschool.myblog.model.*;
 import org.wildcodeschool.myblog.repository.AuthorRepository;
+import org.wildcodeschool.myblog.service.UserService;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/authors")
 public class AuthorController {
 
+    private final UserService userService;
     private final AuthorRepository authorRepository;
 
-    public AuthorController(AuthorRepository authorRepository) {
+    public AuthorController(AuthorRepository authorRepository, UserService userService) {
         this.authorRepository = authorRepository;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -37,6 +42,17 @@ public class AuthorController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(convertToDTO(author));
+    }
+
+    @PostMapping("/register")
+
+    public ResponseEntity<User> register(@RequestBody UserRegistrationDTO userRegistrationDTO) {
+        User registeredUser = userService.registerUser(
+                userRegistrationDTO.getEmail(),
+                userRegistrationDTO.getPassword(),
+                Set.of("ROLE_USER")// Par défaut, chaque utilisateur aura le rôle "USER"
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
     }
 
     @PostMapping
