@@ -1,5 +1,6 @@
 package org.wildcodeschool.myblog.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.wildcodeschool.myblog.dto.ArticleCreateDTO;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
@@ -22,29 +24,11 @@ public class ArticleService {
     private final AuthorRepository authorRepository;
     private final ArticleAuthorRepository articleAuthorRepository;
 
-    public ArticleService(
-            ArticleRepository articleRepository,
-            ArticleMapper articleMapper,
-            CategoryRepository categoryRepository,
-            ImageRepository imageRepository,
-            AuthorRepository authorRepository,
-            ArticleAuthorRepository articleAuthorRepository) {
-        this.articleRepository = articleRepository;
-        this.articleMapper = articleMapper;
-        this.categoryRepository = categoryRepository;
-        this.imageRepository = imageRepository;
-        this.authorRepository = authorRepository;
-        this.articleAuthorRepository = articleAuthorRepository;
-    }
-
-
     public List<ArticleDTO> getAllArticles() {
         return  articleRepository.findAll()
                 .stream()
                 .map(articleMapper::toDTO).toList();
-
     }
-
 
     public ArticleDTO getArticleById(Long id) {
         Article article = articleRepository.findById(id).orElseThrow(() ->
@@ -54,7 +38,6 @@ public class ArticleService {
 
 
     public ArticleDTO createArticle(ArticleCreateDTO articleCreateDTO) {
-
         Article article = articleMapper.toEntity(articleCreateDTO);
         LocalDateTime now = LocalDateTime.now();
         article.setCreatedAt(now);

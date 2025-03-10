@@ -1,11 +1,12 @@
 package org.wildcodeschool.myblog.model;
 
 import jakarta.persistence.*;
-
+import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Data
 public class Article {
 
     @Id
@@ -38,69 +39,4 @@ public class Article {
 
     @OneToMany(mappedBy = "article")
     private List<ArticleAuthor> articleAuthors;
-
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Category category) {
-        this.category = category;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public List<Image> getImages() {
-        return images;
-    }
-
-    public void setImages(List<Image> images) {
-        this.images = images;
-    }
-
-    public List<ArticleAuthor> getArticleAuthors() {
-        return articleAuthors;
-    }
-
-    public void setArticleAuthors(List<ArticleAuthor> articleAuthors) {
-        this.articleAuthors = articleAuthors;
-    }
 }

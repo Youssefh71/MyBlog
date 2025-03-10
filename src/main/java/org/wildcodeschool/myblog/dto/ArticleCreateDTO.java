@@ -2,9 +2,10 @@ package org.wildcodeschool.myblog.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-
+import lombok.Data;
 import java.util.List;
 
+@Data
 public class ArticleCreateDTO {
 
     @NotBlank(message = "Le titre ne doit pas être vide")
@@ -24,44 +25,4 @@ public class ArticleCreateDTO {
 
     @NotEmpty(message = "La liste des auteurs ne doit pas être vide")
     private List<@Valid ArticleAuthorDTO> authors;
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(Long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public List<ImageDTO> getImages() {
-        return images;
-    }
-
-    public void setImages(List<ImageDTO> images) {
-        this.images = images;
-    }
-
-    public List<ArticleAuthorDTO> getAuthors() {
-        return authors;
-    }
-
-    public void setAuthors(List<ArticleAuthorDTO> authors) {
-        this.authors = authors;
-    }
 }

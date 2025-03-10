@@ -1,10 +1,11 @@
 package org.wildcodeschool.myblog.model;
 
 import jakarta.persistence.*;
-
+import lombok.Data;
 import java.util.List;
 
 @Entity
+@Data
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,28 +16,4 @@ public class Image {
 
     @ManyToMany(mappedBy = "images")
     private List<Article> articles;
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public List<Article> getArticles() {
-        return articles;
-    }
-
-    public void setArticles(List<Article> articles) {
-        this.articles = articles;
-    }
 }
