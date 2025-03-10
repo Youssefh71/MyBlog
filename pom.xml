@@ -94,6 +94,13 @@
             <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson, or jjwt-orgjson -->
             <version>0.11.5</version>
         </dependency>
+        <!-- Dépendance Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -116,6 +123,11 @@
                             <version>1.5.5.Final</version>
                         </path>
                         <!-- other annotation processors -->
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.36</version>
+                        </path>
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
